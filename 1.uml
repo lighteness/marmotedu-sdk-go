@@ -1,0 +1,539 @@
+@startuml
+namespace clientcmd {
+    class AuthInfo << (S,Aquamarine) >> {
+        + LocationOfOrigin string
+        + ClientCertificate string
+        + ClientCertificateData string
+        + ClientKey string
+        + ClientKeyData string
+        + Token string
+        + Username string
+        + Password string
+        + SecretID string
+        + SecretKey string
+
+    }
+    interface ClientConfig  {
+        + ClientConfig() (*rest.Config, error)
+
+    }
+    class Config << (S,Aquamarine) >> {
+        + APIVersion string
+        + AuthInfo *AuthInfo
+        + Server *Server
+
+    }
+    class DirectClientConfig << (S,Aquamarine) >> {
+        - config Config
+
+        - getAuthInfo() AuthInfo
+        - getServer() Server
+
+        + ClientConfig() (*rest.Config, error)
+        + ConfirmUsable() error
+
+    }
+    class Server << (S,Aquamarine) >> {
+        + LocationOfOrigin string
+        + Timeout time.Duration
+        + MaxRetries int
+        + RetryInterval time.Duration
+        + Address string
+        + TLSServerName string
+        + InsecureSkipTLSVerify bool
+        + CertificateAuthority string
+        + CertificateAuthorityData string
+
+    }
+    class clientcmd.errConfigurationInvalid << (T, #FF7700) >>  {
+    }
+    class errConfigurationInvalid << (S,Aquamarine) >> {
+        - visit(f <font color=blue>func</font>(error) bool) bool
+
+        + Error() string
+        + Errors() []error
+        + Is(target error) bool
+
+    }
+    class errEmptyConfig << (S,Aquamarine) >> {
+        - message string
+
+        + Error() string
+
+    }
+}
+
+"clientcmd.ClientConfig" <|-- "clientcmd.DirectClientConfig"
+
+namespace gorequest {
+    class File << (S,Aquamarine) >> {
+        + Filename string
+        + Fieldname string
+        + Data []byte
+
+    }
+    interface Logger  {
+        + SetPrefix( string) 
+        + Printf(format string, v ...<font color=blue>interface</font>{}) 
+        + Println(v ...<font color=blue>interface</font>{}) 
+
+    }
+    class SuperAgent << (S,Aquamarine) >> {
+        - logger Logger
+        - isClone bool
+        - ctx context.Context
+
+        + Url string
+        + Method string
+        + Header http.Header
+        + TargetType string
+        + ForceType string
+        + Data <font color=blue>map</font>[string]<font color=blue>interface</font>{}
+        + SliceData []<font color=blue>interface</font>{}
+        + FormData url.Values
+        + QueryData url.Values
+        + FileData []File
+        + BounceToRawString bool
+        + RawString string
+        + Client *http.Client
+        + Transport *http.Transport
+        + Cookies []*http.Cookie
+        + Errors []error
+        + BasicAuth <font color=blue>struct</font>{string}
+        + Debug bool
+        + CurlCommand bool
+        + Retryable superAgentRetryable
+        + DoNotClearSuperAgent bool
+
+        - queryStruct(content <font color=blue>interface</font>{}) *SuperAgent
+        - queryString(content string) *SuperAgent
+        - queryMap(content <font color=blue>interface</font>{}) *SuperAgent
+        - isRetryableRequest(resp Response) bool
+        - getResponseBytes() (Response, []byte, []error)
+        - safeModifyHttpClient() 
+        - safeModifyHttpClient() 
+        - safeModifyTransport() 
+        - safeModifyTransport() 
+        - safeModifyTransport() 
+        - safeModifyTransport() 
+        - safeModifyTransport() 
+        - safeModifyTransport() 
+
+        + Clone() *SuperAgent
+        + SetDebug(enable bool) *SuperAgent
+        + SetCurlCommand(enable bool) *SuperAgent
+        + SetDoNotClearSuperAgent(enable bool) *SuperAgent
+        + SetLogger(logger Logger) *SuperAgent
+        + ClearSuperAgent() 
+        + CustomMethod(method string, targetUrl string) *SuperAgent
+        + Get(targetUrl string) *SuperAgent
+        + Post(targetUrl string) *SuperAgent
+        + Head(targetUrl string) *SuperAgent
+        + Put(targetUrl string) *SuperAgent
+        + Delete(targetUrl string) *SuperAgent
+        + Patch(targetUrl string) *SuperAgent
+        + Options(targetUrl string) *SuperAgent
+        + Set(param string, value string) *SuperAgent
+        + AppendHeader(param string, value string) *SuperAgent
+        + Retry(retryerCount int, retryerTime time.Duration, statusCode ...int) *SuperAgent
+        + SetBasicAuth(username string, password string) *SuperAgent
+        + WithContext(ctx context.Context) *SuperAgent
+        + AddCookie(c *http.Cookie) *SuperAgent
+        + AddCookies(cookies []*http.Cookie) *SuperAgent
+        + Type(typeStr string) *SuperAgent
+        + Query(content <font color=blue>interface</font>{}) *SuperAgent
+        + Param(key string, value string) *SuperAgent
+        + TLSClientConfig(config *tls.Config) *SuperAgent
+        + Proxy(proxyUrl string) *SuperAgent
+        + RedirectPolicy(policy <font color=blue>func</font>(Request, []Request) error) *SuperAgent
+        + Send(content <font color=blue>interface</font>{}) *SuperAgent
+        + SendSlice(content []<font color=blue>interface</font>{}) *SuperAgent
+        + SendMap(content <font color=blue>interface</font>{}) *SuperAgent
+        + SendStruct(content <font color=blue>interface</font>{}) *SuperAgent
+        + SendString(content string) *SuperAgent
+        + SendFile(file <font color=blue>interface</font>{}, args ...string) *SuperAgent
+        + End(callback ...<font color=blue>func</font>(Response, string, []error) ) (Response, string, []error)
+        + EndBytes(callback ...<font color=blue>func</font>(Response, []byte, []error) ) (Response, []byte, []error)
+        + EndStruct(v <font color=blue>interface</font>{}, callback ...<font color=blue>func</font>(Response, <font color=blue>interface</font>{}, []byte, []error) ) (Response, []byte, []error)
+        + MakeRequest() (*http.Request, error)
+        + AsCurlCommand() (string, error)
+        + Timeout(timeout time.Duration) *SuperAgent
+        + Timeout(timeout time.Duration) *SuperAgent
+
+    }
+    class gorequest.Request << (T, #FF7700) >>  {
+    }
+    class gorequest.Response << (T, #FF7700) >>  {
+    }
+    class superAgentRetryable << (S,Aquamarine) >> {
+        + RetryableStatus []int
+        + RetryerTime time.Duration
+        + RetryerCount int
+        + Attempt int
+        + Enable bool
+
+    }
+    class "*http.Request" as httpRequest {
+        'This class was created so that we can correctly have an alias pointing to this name. Since it contains dots that can break namespaces
+    }
+    class "*http.Response" as httpResponse {
+        'This class was created so that we can correctly have an alias pointing to this name. Since it contains dots that can break namespaces
+    }
+}
+
+
+namespace iam {
+    class IamClient << (S,Aquamarine) >> {
+        - apiV1 *v1.APIV1Client
+        - authzV1 *v1.AuthzV1Client
+
+        + APIV1() v1.APIV1Interface
+        + AuthzV1() v1.AuthzV1Interface
+
+    }
+    interface IamInterface  {
+        + APIV1() v1.APIV1Interface
+        + AuthzV1() v1.AuthzV1Interface
+
+    }
+}
+
+"iam.IamInterface" <|-- "iam.IamClient"
+
+namespace marmotedu {
+    class Clientset << (S,Aquamarine) >> {
+        - iam *iam.IamClient
+
+        + Iam() iam.IamInterface
+
+    }
+    interface Interface  {
+        + Iam() iam.IamInterface
+
+    }
+}
+
+"marmotedu.Interface" <|-- "marmotedu.Clientset"
+
+namespace rest {
+    class ClientContentConfig << (S,Aquamarine) >> {
+        + Username string
+        + Password string
+        + SecretID string
+        + SecretKey string
+        + BearerToken string
+        + BearerTokenFile string
+        + AcceptContentTypes string
+        + ContentType string
+        + GroupVersion scheme.GroupVersion
+        + Negotiator runtime.ClientNegotiator
+
+        + HasBasicAuth() bool
+        + HasTokenAuth() bool
+        + HasKeyAuth() bool
+
+    }
+    class Config << (S,Aquamarine) >> {
+        + Host string
+        + APIPath string
+        + Username string
+        + Password string
+        + SecretID string
+        + SecretKey string
+        + BearerToken string
+        + BearerTokenFile string
+        + UserAgent string
+        + Timeout time.Duration
+        + MaxRetries int
+        + RetryInterval time.Duration
+
+        + GoString() string
+        + String() string
+
+    }
+    class ContentConfig << (S,Aquamarine) >> {
+        + ServiceName string
+        + AcceptContentTypes string
+        + ContentType string
+        + GroupVersion *scheme.GroupVersion
+        + Negotiator runtime.ClientNegotiator
+
+    }
+    interface Interface  {
+        + Verb(verb string) *Request
+        + Post() *Request
+        + Put() *Request
+        + Get() *Request
+        + Delete() *Request
+        + APIVersion() scheme.GroupVersion
+
+    }
+    class RESTClient << (S,Aquamarine) >> {
+        - base *url.URL
+        - group string
+        - versionedAPIPath string
+        - content ClientContentConfig
+
+        + Client *gorequest.SuperAgent
+
+        + Verb(verb string) *Request
+        + Post() *Request
+        + Put() *Request
+        + Get() *Request
+        + Delete() *Request
+        + APIVersion() scheme.GroupVersion
+
+    }
+    class Request << (S,Aquamarine) >> {
+        - c *RESTClient
+        - timeout time.Duration
+        - verb string
+        - pathPrefix string
+        - subpath string
+        - params url.Values
+        - headers http.Header
+        - resource string
+        - resourceName string
+        - subresource string
+        - err error
+        - body <font color=blue>interface</font>{}
+
+        - setParam(paramName string, value string) *Request
+
+        + Verb(verb string) *Request
+        + Prefix(segments ...string) *Request
+        + Suffix(segments ...string) *Request
+        + Resource(resource string) *Request
+        + SubResource(subresources ...string) *Request
+        + Name(resourceName string) *Request
+        + AbsPath(segments ...string) *Request
+        + RequestURI(uri string) *Request
+        + Param(paramName string, s string) *Request
+        + VersionedParams(v <font color=blue>interface</font>{}) *Request
+        + SetHeader(key string, values ...string) *Request
+        + Timeout(d time.Duration) *Request
+        + URL() *url.URL
+        + Body(obj <font color=blue>interface</font>{}) *Request
+        + Do(ctx context.Context) Result
+
+    }
+    class Result << (S,Aquamarine) >> {
+        - response *gorequest.Response
+        - err error
+        - body []byte
+        - decoder runtime.Decoder
+
+        + Raw() ([]byte, error)
+        + Into(v <font color=blue>interface</font>{}) error
+        + Error() error
+
+    }
+    class TLSClientConfig << (S,Aquamarine) >> {
+        + Insecure bool
+        + ServerName string
+        + CertFile string
+        + KeyFile string
+        + CAFile string
+        + CertData []byte
+        + KeyData []byte
+        + CAData []byte
+        + NextProtos []string
+
+        + GoString() string
+        + String() string
+        + HasCA() bool
+        + HasCertAuth() bool
+
+    }
+    class TLSConfig << (S,Aquamarine) >> {
+        + CAFile string
+        + CertFile string
+        + KeyFile string
+        + ReloadTLSFiles bool
+        + Insecure bool
+        + ServerName string
+        + CAData []byte
+        + CertData []byte
+        + KeyData []byte
+
+    }
+    class rest.sanitizedConfig << (T, #FF7700) >>  {
+    }
+    class rest.sanitizedTLSClientConfig << (T, #FF7700) >>  {
+    }
+}
+"rest.TLSClientConfig" *-- "rest.ClientContentConfig"
+"rest.ContentConfig" *-- "rest.Config"
+"rest.TLSClientConfig" *-- "rest.Config"
+
+"rest.Interface" <|-- "rest.RESTClient"
+
+namespace v1 {
+    class APIV1Client << (S,Aquamarine) >> {
+        - restClient rest.Interface
+
+        + Users() UserInterface
+        + Secrets() SecretInterface
+        + Policies() PolicyInterface
+        + RESTClient() rest.Interface
+
+    }
+    interface APIV1Interface  {
+        + RESTClient() rest.Interface
+
+    }
+    interface AuthzExpansion  {
+    }
+    interface AuthzGetter  {
+        + Authz() AuthzInterface
+
+    }
+    interface AuthzInterface  {
+        + Authorize(ctx context.Context, request *ladon.Request, opts v1.AuthorizeOptions) (*v1.Response, error)
+
+    }
+    class AuthzV1Client << (S,Aquamarine) >> {
+        - restClient rest.Interface
+
+        + Authz() AuthzInterface
+        + RESTClient() rest.Interface
+
+    }
+    interface AuthzV1Interface  {
+        + RESTClient() rest.Interface
+
+    }
+    interface PoliciesGetter  {
+        + Policies() PolicyInterface
+
+    }
+    interface PolicyExpansion  {
+    }
+    interface PolicyInterface  {
+        + Create(ctx context.Context, policy *v1.Policy, opts v1.CreateOptions) (*v1.Policy, error)
+        + Update(ctx context.Context, policy *v1.Policy, opts v1.UpdateOptions) (*v1.Policy, error)
+        + Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
+        + DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
+        + Get(ctx context.Context, name string, opts v1.GetOptions) (*v1.Policy, error)
+        + List(ctx context.Context, opts v1.ListOptions) (*v1.PolicyList, error)
+
+    }
+    interface SecretExpansion  {
+    }
+    interface SecretInterface  {
+        + Create(ctx context.Context, secret *v1.Secret, opts v1.CreateOptions) (*v1.Secret, error)
+        + Update(ctx context.Context, secret *v1.Secret, opts v1.UpdateOptions) (*v1.Secret, error)
+        + Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
+        + DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
+        + Get(ctx context.Context, name string, opts v1.GetOptions) (*v1.Secret, error)
+        + List(ctx context.Context, opts v1.ListOptions) (*v1.SecretList, error)
+
+    }
+    interface SecretsGetter  {
+        + Secrets() SecretInterface
+
+    }
+    interface UserExpansion  {
+    }
+    interface UserInterface  {
+        + Create(ctx context.Context, user *v1.User, opts v1.CreateOptions) (*v1.User, error)
+        + Update(ctx context.Context, user *v1.User, opts v1.UpdateOptions) (*v1.User, error)
+        + Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
+        + DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
+        + Get(ctx context.Context, name string, opts v1.GetOptions) (*v1.User, error)
+        + List(ctx context.Context, opts v1.ListOptions) (*v1.UserList, error)
+
+    }
+    interface UsersGetter  {
+        + Users() UserInterface
+
+    }
+    class authz << (S,Aquamarine) >> {
+        - client rest.Interface
+
+        + Authorize(ctx context.Context, request *ladon.Request, opts v1.AuthorizeOptions) (*v1.Response, error)
+
+    }
+    class policies << (S,Aquamarine) >> {
+        - client rest.Interface
+
+        + Get(ctx context.Context, name string, options v1.GetOptions) (*v1.Policy, error)
+        + List(ctx context.Context, opts v1.ListOptions) (*v1.PolicyList, error)
+        + Create(ctx context.Context, policy *v1.Policy, opts v1.CreateOptions) (*v1.Policy, error)
+        + Update(ctx context.Context, policy *v1.Policy, opts v1.UpdateOptions) (*v1.Policy, error)
+        + Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
+        + DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
+
+    }
+    class secrets << (S,Aquamarine) >> {
+        - client rest.Interface
+
+        + Get(ctx context.Context, name string, options v1.GetOptions) (*v1.Secret, error)
+        + List(ctx context.Context, opts v1.ListOptions) (*v1.SecretList, error)
+        + Create(ctx context.Context, secret *v1.Secret, opts v1.CreateOptions) (*v1.Secret, error)
+        + Update(ctx context.Context, secret *v1.Secret, opts v1.UpdateOptions) (*v1.Secret, error)
+        + Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
+        + DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
+
+    }
+    class users << (S,Aquamarine) >> {
+        - client rest.Interface
+
+        + Get(ctx context.Context, name string, options v1.GetOptions) (*v1.User, error)
+        + List(ctx context.Context, opts v1.ListOptions) (*v1.UserList, error)
+        + Create(ctx context.Context, user *v1.User, opts v1.CreateOptions) (*v1.User, error)
+        + Update(ctx context.Context, user *v1.User, opts v1.UpdateOptions) (*v1.User, error)
+        + Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
+        + DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
+
+    }
+}
+"v1.PoliciesGetter" *-- "v1.APIV1Interface"
+"v1.SecretsGetter" *-- "v1.APIV1Interface"
+"v1.UsersGetter" *-- "v1.APIV1Interface"
+"v1.AuthzExpansion" *-- "v1.AuthzInterface"
+"v1.AuthzGetter" *-- "v1.AuthzV1Interface"
+"v1.PolicyExpansion" *-- "v1.PolicyInterface"
+"v1.SecretExpansion" *-- "v1.SecretInterface"
+"v1.UserExpansion" *-- "v1.UserInterface"
+
+"v1.APIV1Interface" <|-- "v1.APIV1Client"
+"v1.AuthzV1Interface" <|-- "v1.APIV1Client"
+"v1.PoliciesGetter" <|-- "v1.APIV1Client"
+"v1.SecretsGetter" <|-- "v1.APIV1Client"
+"v1.UsersGetter" <|-- "v1.APIV1Client"
+"v1.APIV1Interface" <|-- "v1.AuthzV1Client"
+"v1.AuthzGetter" <|-- "v1.AuthzV1Client"
+"v1.AuthzV1Interface" <|-- "v1.AuthzV1Client"
+"v1.AuthzInterface" <|-- "v1.authz"
+"v1.PolicyInterface" <|-- "v1.policies"
+"v1.SecretInterface" <|-- "v1.secrets"
+"v1.UserInterface" <|-- "v1.users"
+
+namespace version {
+    class Info << (S,Aquamarine) >> {
+        + Major string
+        + Minor string
+        + GitVersion string
+        + GitCommit string
+        + GitTreeState string
+        + BuildDate string
+        + GoVersion string
+        + Compiler string
+        + Platform string
+
+        + String() string
+
+    }
+    class version.versionType << (T, #FF7700) >>  {
+    }
+}
+
+
+"__builtin__.[]error" #.. "clientcmd.errConfigurationInvalid"
+"__builtin__.int" #.. "version.versionType"
+"gorequest.httpRequest" #.. "gorequest.Request"
+"gorequest.httpResponse" #.. "gorequest.Response"
+"rest.*Config" #.. "rest.sanitizedConfig"
+"rest.TLSClientConfig" #.. "rest.sanitizedTLSClientConfig"
+@enduml
